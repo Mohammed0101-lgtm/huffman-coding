@@ -212,9 +212,8 @@ void push(struct priority_queue **stack, struct entry *new) {
     // tranverse the stack to get the position for insertion
     struct entry *e = (*stack)->top;
     
-    while (e->next != NULL && new->weight <= e->next->weight) {
+    while (e->next != NULL && new->weight <= e->next->weight) 
         e = e->next;
-    }
 
     // if the value of the new element is less than the current element
     new->next = e->next;
