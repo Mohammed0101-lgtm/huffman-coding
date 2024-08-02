@@ -49,7 +49,7 @@ struct map *create_map(size_t capacity) {
         return NULL;
 
     m->capacity = capacity; // set capacity
-    m->size = 0; // set initial size
+    m->size     = 0; // set initial size
     
     // co_allocate memory for the buckets of entry
     m->buckets = (struct entry**)calloc(capacity, sizeof(struct entry*));
@@ -65,13 +65,12 @@ struct map *create_map(size_t capacity) {
 // retrieve value of an input key
 int get(struct map *m, const char *key) {
     // hash the key to get the index
-    int index = hash(key) % m->capacity;
-    
+    int index       = hash(key) % m->capacity;
     // create an entry at the bucket
     struct entry *e = m->buckets[index];
 
     // go through the bucket 
-    while (e != NULL) {
+    while (e) {
         // if the key is found then return it's value
         if (strcmp(key, e->symbol) == 0) 
             return e->weight; 
@@ -85,8 +84,7 @@ int get(struct map *m, const char *key) {
 // add new entry to map
 void put(struct map *m, const char *key, int value) {
     // get the appropriate index of the key
-    int index = hash(key) % m->capacity;
-    
+    int index       = hash(key) % m->capacity;
     struct entry *e = m->buckets[index];
 
     // check if the key already exists
@@ -116,7 +114,7 @@ void put(struct map *m, const char *key, int value) {
     }
 
     // place entry at the index
-    new->next = m->buckets[index];
+    new->next         = m->buckets[index];
     m->buckets[index] = new;
     
     m->size++; // increment map size
@@ -167,9 +165,8 @@ struct priority_queue *create_pq(size_t capacity) {
 
     // initialize structure
     p->capacity = capacity;
-    p->top = NULL;
-    
-    p->size = 0;
+    p->top      = NULL;
+    p->size     = 0;
 
     return p;
 }
@@ -202,7 +199,7 @@ void push(struct priority_queue **stack, struct entry *new) {
 
     // if the stack is empty then add the new entry 
     if ((*stack)->top == NULL || new->weight > (*stack)->top->weight) {
-        new->next = (*stack)->top;
+        new->next     = (*stack)->top;
         (*stack)->top = new;
         (*stack)->size++;
         
@@ -211,13 +208,13 @@ void push(struct priority_queue **stack, struct entry *new) {
 
     // tranverse the stack to get the position for insertion
     struct entry *e = (*stack)->top;
-    
+
     while (e->next != NULL && new->weight <= e->next->weight) 
         e = e->next;
 
     // if the value of the new element is less than the current element
     new->next = e->next;
-    e->next = new;
+    e->next   = new;
     
     (*stack)->size++; // increment stack size
 }
@@ -234,7 +231,7 @@ struct node* build_tree(struct map *freq) {
         // go through each bucket at once
         struct entry *e = freq->buckets[i];
         
-        while (e != NULL) {
+        while (e) {
             // initialize new element of the stack
             struct entry *new = (struct entry*)malloc(sizeof(struct entry));
 
@@ -243,7 +240,7 @@ struct node* build_tree(struct map *freq) {
 
             new->symbol = strdup(e->symbol); // set symbol
             new->weight = e->weight; // set frequency
-            new->next = NULL; // point next to null
+            new->next   = NULL; // point next to null
             
             push(&stack, new); // push element to the stack
             
@@ -263,8 +260,8 @@ struct node* build_tree(struct map *freq) {
         
         left->symbol = stack->top->symbol[0]; 
         left->weight = stack->top->weight;
-        left->left = NULL;
-        left->right = NULL;
+        left->left   = NULL;
+        left->right  = NULL;
         
         pop(&stack);
 
@@ -276,8 +273,8 @@ struct node* build_tree(struct map *freq) {
         
         right->symbol = stack->top->symbol[0];
         right->weight = stack->top->weight;
-        right->left = NULL;
-        right->right = NULL;
+        right->left   = NULL;
+        right->right  = NULL;
         
         pop(&stack);
 
@@ -287,8 +284,8 @@ struct node* build_tree(struct map *freq) {
         if (!parent) 
             return NULL;
         
-        parent->left = left;
-        parent->right = right;
+        parent->left   = left;
+        parent->right  = right;
         parent->weight = left->weight + right->weight; // parent node represents both children weights
         parent->symbol = '$'; // no need for the symbol in this node
 
@@ -300,7 +297,7 @@ struct node* build_tree(struct map *freq) {
         
         new_entry->symbol = strdup("$");
         new_entry->weight = parent->weight;
-        new_entry->next = NULL;
+        new_entry->next   = NULL;
         
         push(&stack, new_entry);
     }
@@ -313,8 +310,8 @@ struct node* build_tree(struct map *freq) {
     
     root->symbol = stack->top->symbol[0];
     root->weight = stack->top->weight;
-    root->left = NULL;
-    root->right = NULL;
+    root->left   = NULL;
+    root->right  = NULL;
     
     return root;
 }
@@ -339,9 +336,7 @@ bool isleaf(struct node *n)
 // data compression function
 const char *compress(const char *input) {
     // get the size of the input
-    size_t len = strlen(input);
-
-    // create a frequency map
+    size_t len    = strlen(input);
     struct map *m = create_map(MAX_CAP);
 
     if (!m) 
@@ -350,10 +345,9 @@ const char *compress(const char *input) {
     // get the frequency / weight of each char
     for (size_t i = 0; i < len; i++) {
         char key[2] = { input[i] , '\0' };
+        int val     = get(m, key);
         
-        int val = get(m, key);
         val++;
-        
         put(m, key, val);
     }
 
